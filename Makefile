@@ -319,6 +319,9 @@ CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/frameworks/connectivity/bluetooth/service/st
 CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/frameworks/connectivity/bluetooth/service/stacks/include
 CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/frameworks/connectivity/bluetooth/service/vendor
 
+CSRCS += sample_code/a2dpsnk/*.c
+CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/frameworks/connectivity/bluetooth/sample_code/a2dpsnk
+
 ifeq ($(CONFIG_BLUETOOTH_SERVICE), y)
 ifneq ($(CONFIG_BLUETOOTH_STACK_BREDR_BLUELET)$(CONFIG_BLUETOOTH_STACK_LE_BLUELET),)
 	CFLAGS += ${INCDIR_PREFIX}$(APPDIR)/frameworks/connectivity/bluetooth/service/stacks/bluelet/include
@@ -358,6 +361,8 @@ ifeq ($(CONFIG_BLUETOOTH_TOOLS), y)
 	MAINSRC  += tools/bt_tools.c
 	PROGNAME += adapter_test
 	MAINSRC  += tests/adapter_test.c
+	PROGNAME += z
+	MAINSRC  += sample_code/a2dpsnk/a2dpsnk.c
 endif
 
 ifeq ($(CONFIG_BLUETOOTH_UPGRADE), y)
