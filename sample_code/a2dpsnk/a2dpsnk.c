@@ -27,12 +27,19 @@ static app_demo_t app_demo = { 0 };
  * @note The address is in reverse order. If the address of the peer device
  *       is 11:22:33:44:55:66, it should be written as 66:55:44:33:22:11 here.
  */
+<<<<<<< HEAD
 static const bt_address_t test_remote_addr = {
     { 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 }
 };
+=======
+
+>>>>>>> b4a8a55 (final729)
 // static const bt_address_t test_remote_addr = {
-//     { 0x9B, 0xDF, 0x59, 0x60, 0x6C, 0x88 }
+//     { 0x66, 0x55, 0x44, 0x33, 0x22, 0x11 }
 // };
+static const bt_address_t test_remote_addr = {
+    { 0x9B, 0xDF, 0x59, 0x60, 0x6C, 0x88 }
+};
 /**
  * @brief Block the current thread and wait to be woken up.
  */
