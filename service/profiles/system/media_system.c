@@ -54,13 +54,24 @@ static int media_volume_to_ui_volume(int volume)
 
 int bt_media_get_music_volume_range(void)
 {
+#ifdef CONFIG_MEDIA
     int media_min_volume = 0; /* min volume of AVRCP must be 0. */
     int status;
 
     status = media_policy_get_range(MEDIA_SCENARIO_MUSIC MEDIA_POLICY_VOLUME, &media_min_volume, &g_media_max_volume);
 
-    assert(!media_min_volume);
+    //assert(!media_min_volume);
+    if (media_min_volume != 0) {
+        LOG_ERROR("Media min volume must be 0, but got %d", media_min_volume);
+        media_min_volume = 0;
+    }
+
     return status;
+#else
+    LOG_WARNING("Media not enabled");
+    g_media_max_volume = 15;
+    return 0;
+#endif
 }
 
 int bt_media_volume_avrcp_to_media(uint8_t volume)
@@ -146,6 +157,7 @@ void bt_media_remove_listener(void* handle)
 
 bt_status_t bt_media_set_a2dp_available(void)
 {
+#ifdef CONFIG_MEDIA
     int is_available = 0;
 
     /* check A2DP device is available */
@@ -162,10 +174,15 @@ bt_status_t bt_media_set_a2dp_available(void)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_a2dp_unavailable(void)
 {
+#ifdef CONFIG_MEDIA
     int is_available = 0;
 
     /* check A2DP device is unavailable */
@@ -182,10 +199,15 @@ bt_status_t bt_media_set_a2dp_unavailable(void)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_hfp_samplerate(uint16_t samplerate)
 {
+#ifdef CONFIG_MEDIA
     if (samplerate != 8000 && samplerate != 16000)
         return BT_STATUS_PARM_INVALID;
 
@@ -194,6 +216,10 @@ bt_status_t bt_media_set_hfp_samplerate(uint16_t samplerate)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 static void bt_media_policy_volume_change_callback(void* cookie, int number, const char* literal)
@@ -205,6 +231,7 @@ static void bt_media_policy_volume_change_callback(void* cookie, int number, con
 
 void* bt_media_listen_voice_call_volume_change(bt_media_voice_volume_change_callback_t cb, void* context)
 {
+#ifdef CONFIG_MEDIA
     bt_media_listener_t* listener = malloc(sizeof(bt_media_listener_t));
     if (!listener)
         return NULL;
@@ -219,26 +246,41 @@ void* bt_media_listen_voice_call_volume_change(bt_media_voice_volume_change_call
     }
 
     return listener;
+#else
+    LOG_WARNING("Media not enabled");
+    return NULL;
+#endif
 }
 
 bt_status_t bt_media_get_voice_call_volume(int* volume)
 {
+#ifdef CONFIG_MEDIA
     if (media_policy_get_stream_volume(MEDIA_SCENARIO_INCALL, volume) != 0)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_voice_call_volume(int volume)
 {
+#ifdef CONFIG_MEDIA
     if (media_policy_set_stream_volume(MEDIA_SCENARIO_INCALL, volume) != 0)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_music_volume(int volume)
 {
+#ifdef CONFIG_MEDIA
     bt_status_t status;
 
     status = media_policy_set_stream_volume(MEDIA_STREAM_MUSIC, volume);
@@ -268,18 +310,28 @@ bt_status_t bt_media_set_music_volume(int volume)
 #endif /* CONFIG_MICO_MEDIA_MAIN_PLAYER */
 
     return status;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_get_music_volume(int* volume)
 {
+#ifdef CONFIG_MEDIA
     if (media_policy_get_stream_volume(MEDIA_STREAM_MUSIC, volume) != 0)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 void* bt_media_listen_music_volume_change(bt_media_voice_volume_change_callback_t cb, void* context)
 {
+#ifdef CONFIG_MEDIA
     bt_media_listener_t* listener;
 
     listener = malloc(sizeof(bt_media_listener_t));
@@ -291,23 +343,37 @@ void* bt_media_listen_music_volume_change(bt_media_voice_volume_change_callback_
     listener->policy_handle = media_policy_subscribe(MEDIA_SCENARIO_MUSIC MEDIA_POLICY_VOLUME, bt_media_policy_volume_change_callback, listener);
 
     return listener;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_sco_available(void)
 {
+#ifdef CONFIG_MEDIA
     /* set SCO device available */
     if (media_policy_set_devices_available(MEDIA_DEVICE_SCO) != 0)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_sco_unavailable(void)
 {
+#ifdef CONFIG_MEDIA
     if (media_policy_set_devices_unavailable(MEDIA_DEVICE_SCO) != 0)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_a2dp_offloading(bool enable)
@@ -326,6 +392,7 @@ bt_status_t bt_media_set_hfp_offloading(bool enable)
 
 bt_status_t bt_media_set_lea_available(void)
 {
+#ifdef CONFIG_MEDIA
     int is_available = 0;
 
     /* check LEA device is available */
@@ -342,10 +409,15 @@ bt_status_t bt_media_set_lea_available(void)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_lea_unavailable(void)
 {
+#ifdef CONFIG_MEDIA
     int is_available = 0;
 
     /* check LEA device is unavailable */
@@ -362,6 +434,10 @@ bt_status_t bt_media_set_lea_unavailable(void)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_set_lea_offloading(bool enable)
@@ -373,8 +449,13 @@ bt_status_t bt_media_set_lea_offloading(bool enable)
 
 bt_status_t bt_media_set_anc_enable(bool enable)
 {
+#ifdef CONFIG_MEDIA
     if (media_policy_set_int(MEDIA_POLICY_ANC_OFFLOAD_MODE, (int)enable, MEDIA_POLICY_APPLY) != 0)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }

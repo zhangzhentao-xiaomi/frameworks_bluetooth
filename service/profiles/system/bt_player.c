@@ -64,6 +64,7 @@ static bt_media_status_t media_state_to_playback_status(int media_state)
 static void media_session_event_cb(void* cookie, int event, int ret,
     const char* extra)
 {
+#ifdef CONFIG_MEDIA
     bt_media_controller_t* controller = cookie;
     int status;
     int media_state;
@@ -101,6 +102,10 @@ static void media_session_event_cb(void* cookie, int event, int ret,
     default:
         return;
     }
+#else
+    LOG_WARNING("Media not enabled");
+    return;
+#endif
 }
 
 char* bt_media_evt_str(bt_media_event_t evt)
@@ -135,6 +140,7 @@ char* bt_media_status_str(uint8_t status)
 
 bt_media_controller_t* bt_media_controller_create(void* context, bt_media_notify_callback_t cb)
 {
+#ifdef CONFIG_MEDIA
     bt_media_controller_t* controller = malloc(sizeof(*controller));
     int ret = 0;
 
@@ -158,6 +164,10 @@ bt_media_controller_t* bt_media_controller_create(void* context, bt_media_notify
     controller->cb = cb;
 
     return controller;
+#else
+    LOG_WARNING("Media not enabled");
+    return NULL;
+#endif
 }
 
 void bt_media_controller_set_context(bt_media_controller_t* controller, void* context)
@@ -167,15 +177,21 @@ void bt_media_controller_set_context(bt_media_controller_t* controller, void* co
 
 void bt_media_controller_destory(bt_media_controller_t* controller)
 {
+#ifdef CONFIG_MEDIA
     if (!controller)
         return;
 
     media_session_close(controller->mediasession);
     free(controller);
+#else
+    LOG_WARNING("Media not enabled");
+    return;
+#endif
 }
 
 bt_status_t bt_media_player_play(bt_media_controller_t* controller)
 {
+#ifdef CONFIG_MEDIA
     if (!controller)
         return BT_STATUS_PARM_INVALID;
 
@@ -183,10 +199,15 @@ bt_status_t bt_media_player_play(bt_media_controller_t* controller)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_player_pause(bt_media_controller_t* controller)
 {
+#ifdef CONFIG_MEDIA
     if (!controller)
         return BT_STATUS_PARM_INVALID;
 
@@ -194,10 +215,15 @@ bt_status_t bt_media_player_pause(bt_media_controller_t* controller)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_player_stop(bt_media_controller_t* controller)
 {
+#ifdef CONFIG_MEDIA
     if (!controller)
         return BT_STATUS_PARM_INVALID;
 
@@ -205,10 +231,15 @@ bt_status_t bt_media_player_stop(bt_media_controller_t* controller)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_player_next(bt_media_controller_t* controller)
 {
+#ifdef CONFIG_MEDIA
     if (!controller)
         return BT_STATUS_PARM_INVALID;
 
@@ -216,10 +247,15 @@ bt_status_t bt_media_player_next(bt_media_controller_t* controller)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_player_prev(bt_media_controller_t* controller)
 {
+#ifdef CONFIG_MEDIA
     if (!controller)
         return BT_STATUS_PARM_INVALID;
 
@@ -227,11 +263,16 @@ bt_status_t bt_media_player_prev(bt_media_controller_t* controller)
         return BT_STATUS_FAIL;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_player_get_playback_status(bt_media_controller_t* controller,
     bt_media_status_t* status)
 {
+#ifdef CONFIG_MEDIA
     int state = 0;
 
     if (!controller || !status)
@@ -244,10 +285,15 @@ bt_status_t bt_media_player_get_playback_status(bt_media_controller_t* controlle
 
     *status = media_state_to_playback_status(state);
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_player_get_position(bt_media_controller_t* controller, uint32_t* positions)
 {
+#ifdef CONFIG_MEDIA
     if (!controller || !positions)
         return BT_STATUS_PARM_INVALID;
 
@@ -257,10 +303,15 @@ bt_status_t bt_media_player_get_position(bt_media_controller_t* controller, uint
     }
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_player_get_durations(bt_media_controller_t* controller, uint32_t* durations)
 {
+#ifdef CONFIG_MEDIA
     if (!controller || !durations)
         return BT_STATUS_PARM_INVALID;
 
@@ -270,6 +321,10 @@ bt_status_t bt_media_player_get_durations(bt_media_controller_t* controller, uin
     }
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 static void media_control_event_cb(void* cookie, int event,
@@ -300,6 +355,7 @@ static void media_control_event_cb(void* cookie, int event,
 
 bt_media_player_t* bt_media_player_create(void* context, bt_media_player_callback_t* cb)
 {
+#ifdef CONFIG_MEDIA
     if (context == NULL || cb == NULL)
         return NULL;
 
@@ -317,10 +373,15 @@ bt_media_player_t* bt_media_player_create(void* context, bt_media_player_callbac
     player->play_status = BT_MEDIA_PLAY_STATUS_ERROR;
 
     return player;
+#else
+    LOG_WARNING("Media not enabled");
+    return NULL;
+#endif
 }
 
 void bt_media_player_destory(bt_media_player_t* player)
 {
+#ifdef CONFIG_MEDIA
     if (!player)
         return;
 
@@ -330,10 +391,15 @@ void bt_media_player_destory(bt_media_player_t* player)
     }
 
     free(player);
+#else
+    LOG_WARNING("Media not enabled");
+    return;
+#endif
 }
 
 bt_status_t bt_media_player_set_status(bt_media_player_t* player, bt_media_status_t status)
 {
+#ifdef CONFIG_MEDIA
     int event;
 
     if (!player)
@@ -361,11 +427,14 @@ bt_status_t bt_media_player_set_status(bt_media_player_t* player, bt_media_statu
     default:
         return BT_STATUS_PARM_INVALID;
     }
-
-    media_session_notify(player->mediasession, event, 0, NULL);
+    media_session_notify(player->mediasession, event, 0, NULL); // player有保护，需要保护player->mediasessio吗？
     player->play_status = status;
 
     return BT_STATUS_SUCCESS;
+#else
+    LOG_WARNING("Media not enabled");
+    return BT_STATUS_FAIL;
+#endif
 }
 
 bt_status_t bt_media_player_set_duration(bt_media_player_t* player, uint32_t duration)
